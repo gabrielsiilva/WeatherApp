@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import LocationCard from '../../components/LocationCard';
 
@@ -16,10 +16,19 @@ import {
 } from './styles.js';
 
 import { searchCityWeather } from '../../services/api';
-import { ActivityIndicator } from 'react-native';
+import { ActivityIndicator, AsyncStorage } from 'react-native';
 
 export default function DashboardPage({ navigation }) {
   const [searchText, setSearchText] = useState('');
+  const [savedLocations, setSavedLocations] = useState([]);
+
+  useEffect(async () => {
+    const locations = await AsyncStorage.getItem('locations');
+
+    if(locations) {
+      setSavedLocations(locations);
+    }
+  }, []);
 
   handleChangeText = text => {
     setSearchText(text);
@@ -32,15 +41,15 @@ export default function DashboardPage({ navigation }) {
   };
 
   showLoading = () => {
-      return (
-        <LoadingContainer>
-          <ActivityIndicator
-            size="small"
-            color="#b9b9b9"
-          />
-          <LoadingText>Loading...</LoadingText>
-        </LoadingContainer>
-      );
+    return (
+      <LoadingContainer>
+        <ActivityIndicator
+          size="small"
+          color="#b9b9b9"
+        />
+        <LoadingText>Loading...</LoadingText>
+      </LoadingContainer>
+    );
   }
 
   return (
@@ -65,7 +74,7 @@ export default function DashboardPage({ navigation }) {
 
         <LocationsContainer>
           <LocationText>Your Saved Locations</LocationText>
-          <LocationCard navigateTo={() => navigation.navigate('Details')} />
+          <LocationCard savedLocation={savedLocations} navigateTo={() => navigation.navigate('Details')} />
         </LocationsContainer>
       </ScrollContainer>
     </Container>

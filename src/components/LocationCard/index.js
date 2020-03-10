@@ -4,22 +4,19 @@ import {
   Container,
   CardContent,
   CityInfo,
-  CityName,
-  CountryName
+  CityName
 } from './styles';
 
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
-import themeData from '../../util/theme-data';
 
-export default function LocationCard({ navigateTo }) {
+export default function LocationCard({ navigateTo, savedLocation }) {
 
   return (
     <TouchableWithoutFeedback onPress={navigateTo}>
-      <Container source={themeData[1].backgroundImage} resizeMode="cover" imageStyle={{ borderRadius: 10 }}>
+      <Container source={savedLocation?.theme?.backgroundImage} resizeMode="cover" imageStyle={{ borderRadius: 10 }}>
         <CardContent>
           <CityInfo>
-            <CityName>Campina Grande</CityName>
-            <CountryName>Brasil</CountryName>
+            <CityName>{savedLocation.cityName}</CityName>
           </CityInfo>
         </CardContent>
       </Container>

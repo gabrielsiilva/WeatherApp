@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Icon } from 'react-native-elements'
-import { ActivityIndicator, Dimensions } from 'react-native';
+import { ActivityIndicator, Dimensions, AsyncStorage } from 'react-native';
 import moment from 'moment';
 
 import WeatherList from '../../components/WeatherList';
@@ -38,7 +38,7 @@ export default function LocationDetailPage({ route, navigation }) {
     setPageLoaded(true);
   }, []);
 
-  receiveDataFromSearch = () => {
+  const receiveDataFromSearch = () => {
     const { responseWeather } = route.params;
 
     const { data } = responseWeather;
@@ -50,9 +50,18 @@ export default function LocationDetailPage({ route, navigation }) {
     setCityWeatherInfo(weatherResponse);
   }
 
-  formatDateWeatherReceived = () => {
+  const formatDateWeatherReceived = () => {
     return moment(cityWeatherInfo?.latestWeather?.dt_txt).format('HH:mm');
   }
+
+  const saveLocation = async () => {
+    try {
+      await AsyncStorage.setItem('locations', { cityName: cityWeatherInfo.cityName, theme: locationTheme });
+      navigation.navigate('Dashboard');
+    } catch (e) {
+      console.log('error =>', e);
+    }
+  };
 
   if (!pageLoaded) {
     return (
@@ -101,6 +110,7 @@ export default function LocationDetailPage({ route, navigation }) {
               name='plus'
               color={locationTheme.color}
               reverseColor='#fff'
+              onPress={() => saveLocation()}
             />
           </IconContainer>
 
