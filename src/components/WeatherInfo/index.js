@@ -11,7 +11,6 @@ import SunnyCloud from '../../../assets/sunnycloud.svg';
 import Sunny from '../../../assets/sunny.svg';
 import PartialyRain from '../../../assets/partialyrain.svg';
 import Rain from '../../../assets/rain.svg';
-import Moon from '../../../assets/moon.svg';
 
 
 export default function WeatherInfo({ data }) {
@@ -24,7 +23,7 @@ export default function WeatherInfo({ data }) {
     if (temp > 25) return <Sunny width={30} height={30} />
     if (temp > 20) return <SunnyCloud width={30} height={30} />
     if (temp >= 13) return <PartialyRain width={30} height={30} />
-    if (temp > 9) return <Rain width={30} height={30} />
+    if (temp >= 0) return <Rain width={30} height={30} />
   }
 
 

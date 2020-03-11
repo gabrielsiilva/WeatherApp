@@ -25,6 +25,8 @@ import {
 import Wave from '../../../assets/wave.svg';
 import themeData from '../../util/theme-data';
 
+import { searchCityWeather } from '../../services/api';
+
 export default function LocationDetailPage({ route, navigation }) {
 
   const [locationTheme, setLocationTheme] = useState();
@@ -33,20 +35,36 @@ export default function LocationDetailPage({ route, navigation }) {
   let width = Dimensions.get("window").width + 300;
 
   useEffect(() => {
-    receiveDataFromSearch();
+    
+    const { cityName } = route.params;
+    cityName
+    ? searchCityByName(cityName)
+    : receiveDataFromSearch();
     setLocationTheme(themeData[Math.floor(Math.random() * themeData.length)]);
-    setPageLoaded(true);
+
+    setTimeout(() => {
+      setPageLoaded(false);
+    }, 1000);
+    
   }, []);
 
-  const receiveDataFromSearch = () => {
-    const { responseWeather } = route.params;
+  searchCityByName = async (cityName) => {
+    setPageLoaded(true);
+    const response = await searchCityWeather(cityName);
+    handleResponse(response);
+  }
 
+  const receiveDataFromSearch = () => {
+    handleResponse(route.params.responseWeather);
+  }
+  
+  handleResponse = (responseWeather) => {
     const { data } = responseWeather;
     let weatherResponse = {};
+    
     weatherResponse['latestWeather'] = data.list[0];
     weatherResponse['dayWeather'] = data.list.splice(1, 5);
     weatherResponse['cityName'] = data.city.name;
-
     setCityWeatherInfo(weatherResponse);
   }
 
@@ -56,14 +74,18 @@ export default function LocationDetailPage({ route, navigation }) {
 
   const saveLocation = async () => {
     try {
-      await AsyncStorage.setItem('locations', { cityName: cityWeatherInfo.cityName, theme: locationTheme });
-      navigation.navigate('Dashboard');
+      let savedLocations = await AsyncStorage.getItem('locations');
+      savedLocations = JSON.parse(savedLocations);
+      savedLocations = [ ...savedLocations, { cityName: cityWeatherInfo.cityName, theme: locationTheme }];
+      await AsyncStorage.setItem('locations', JSON.stringify(savedLocations));
+      route.params.onGoBack();
+      navigation.goBack();
     } catch (e) {
       console.log('error =>', e);
     }
   };
 
-  if (!pageLoaded) {
+  showLoading = () => {
     return (
       <LoadingContainer>
         <ActivityIndicator
@@ -72,10 +94,11 @@ export default function LocationDetailPage({ route, navigation }) {
         />
         <LoadingText>Loading...</LoadingText>
       </LoadingContainer>
-    )
+    );
   }
 
-  return (
+  return pageLoaded ? ( showLoading() )
+  : (
     <>
       <Container>
         <BackgroundDetailsBox>
@@ -83,7 +106,7 @@ export default function LocationDetailPage({ route, navigation }) {
           <ImageBackground
             resizeMode="cover"
             imageStyle={{ width: width }}
-            source={locationTheme.backgroundImage}
+            source={locationTheme?.backgroundImage}
           >
 
             <WeatherDetail>
@@ -108,13 +131,13 @@ export default function LocationDetailPage({ route, navigation }) {
               reverse
               type='font-awesome'
               name='plus'
-              color={locationTheme.color}
+              color={locationTheme?.color}
               reverseColor='#fff'
               onPress={() => saveLocation()}
             />
           </IconContainer>
 
-          <CityName color={locationTheme.color}>{cityWeatherInfo?.cityName}</CityName>
+          <CityName color={locationTheme?.color}>{cityWeatherInfo?.cityName}</CityName>
 
           <WeatherContainer>
             <WeatherList dayWeather={cityWeatherInfo?.dayWeather} />
@@ -125,5 +148,4 @@ export default function LocationDetailPage({ route, navigation }) {
       </ContainerFlex>
     </>
   );
-
 }

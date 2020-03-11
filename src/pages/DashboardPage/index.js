@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { ActivityIndicator, AsyncStorage } from 'react-native';
+import { FlatList } from 'react-native-gesture-handler';
 
 import LocationCard from '../../components/LocationCard';
 
@@ -16,29 +18,33 @@ import {
 } from './styles.js';
 
 import { searchCityWeather } from '../../services/api';
-import { ActivityIndicator, AsyncStorage } from 'react-native';
 
 export default function DashboardPage({ navigation }) {
   const [searchText, setSearchText] = useState('');
   const [savedLocations, setSavedLocations] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(async () => {
-    const locations = await AsyncStorage.getItem('locations');
-
-    if(locations) {
-      setSavedLocations(locations);
-    }
+  useEffect(() => {
+    getAsyncStorageData();
   }, []);
 
-  handleChangeText = text => {
-    setSearchText(text);
+  searchWeather = () => {
+    setLoading(true);
+    searchCityWeather(searchText).then((response) => {
+      navigation.navigate('Details', { responseWeather: response, onGoBack: () => this.getAsyncStorageData() });
+      setLoading(false);
+    });
   };
 
-  searchWeather = async () => {
-    showLoading()
-    const response = await searchCityWeather(searchText);
-    navigation.navigate('Details', { responseWeather: response });
-  };
+  getAsyncStorageData = async () => {
+    let locations = await AsyncStorage.getItem('locations');
+    locations = JSON.parse(locations);
+
+    if (locations) {
+      setSavedLocations(locations);
+      setSearchText('');
+    }
+  }
 
   showLoading = () => {
     return (
@@ -52,31 +58,43 @@ export default function DashboardPage({ navigation }) {
     );
   }
 
-  return (
-    <Container>
-      <SearchLocationContainer>
-        <SearchLocationInput
-          autoCapitalize="words"
-          autoCompleteType="off"
-          autoCorrect={false}
-          numberOfLines={1}
-          multiline
-          placeholder="Search for a city"
-          onChangeText={(text) => { handleChangeText(text) }}
-          value={searchText}
-        />
-        <SearchLocationButton onPress={() => { searchWeather() }}>
-          <SearchLocationButtonText>Search</SearchLocationButtonText>
-        </SearchLocationButton>
-      </SearchLocationContainer>
+  return loading ? (showLoading())
+    :
+    (
+      <Container>
+        <SearchLocationContainer>
+          <SearchLocationInput
+            autoCapitalize="words"
+            autoCompleteType="off"
+            autoCorrect={false}
+            numberOfLines={1}
+            multiline
+            placeholder="Search for a city"
+            onChangeText={(text) => { setSearchText(text) }}
+            value={searchText}
+          />
+          <SearchLocationButton onPress={() => { searchWeather() }}>
+            <SearchLocationButtonText>Search</SearchLocationButtonText>
+          </SearchLocationButton>
+        </SearchLocationContainer>
 
-      <ScrollContainer>
+        <ScrollContainer>
 
-        <LocationsContainer>
-          <LocationText>Your Saved Locations</LocationText>
-          <LocationCard savedLocation={savedLocations} navigateTo={() => navigation.navigate('Details')} />
-        </LocationsContainer>
-      </ScrollContainer>
-    </Container>
-  );
+          <LocationsContainer>
+            <LocationText>Your Saved Locations</LocationText>
+            <FlatList
+              data={savedLocations}
+              showsHorizontalScrollIndicator={false}
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item }) => (
+                <LocationCard
+                  savedLocation={item}
+                  navigateTo={() => navigation.navigate('Details', { cityName: item.cityName, onGoBack: () => this.getAsyncStorageData() })}
+                />
+              )}
+            />
+          </LocationsContainer>
+        </ScrollContainer>
+      </Container>
+    );
 }

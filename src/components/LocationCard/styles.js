@@ -27,9 +27,3 @@ export const CountryName = styled.Text`
   font-weight: 500;
   color: #fff;
 `;
-
-export const WeatherTemp = styled.Text`
-  font-size: 55px;
-  font-weight: 500;
-  color: #fff;
-`;

@@ -12,7 +12,7 @@ export default function WeatherList({ dayWeather }) {
     <>
         <WeatherFlatList
           data={dayWeather}
-          keyExtractor={item => item.dt}
+          keyExtractor={item => item.dt.toString()}
           horizontal={true}
           scrollEnabled={false}
           showsHorizontalScrollIndicator={false}

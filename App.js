@@ -3,7 +3,11 @@ import Routes from './src/routes';
 import { StatusBar, YellowBox } from 'react-native';
 
 YellowBox.ignoreWarnings([
-  'Expected style'
+  'Expected style',
+  'Non-serializable',
+  'VirtualizedLists',
+  'VirtualizedList',
+
 ]);
 
 export default function App() {
