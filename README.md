@@ -1,11 +1,11 @@
 # myWeatherApp :D
 
 
-![EmptyLocations](https://drive.google.com/open?id=1ltNS28SJdUB8ERQLxNaRFz8jdfyGa4mL)
-![SearchLocation](https://drive.google.com/open?id=1k15BT9AgWfhdi8xQ3-BZWmQOfdgWnR26)
-![LocationList](https://drive.google.com/open?id=1N4LfaR3l_vIOVnIA0o9cvjeIzYzHWj-n)
-![SearchLocation2](https://drive.google.com/open?id=1nlZNAKgVgQj6GicUWXBiNejhAwrxdqMc)
-![SavedLocationDetail](https://drive.google.com/open?id=1WO-wn3vvzGNWcw5dCS_0-_bOBkUovfJB)
+![EmptyLocations](/assets/app-preview/EmptyDashboard.png)
+![SearchLocation](/assets/app-preview/Location1.png)
+![LocationList](/assets/app-preview/LocationList.png)
+![SearchLocation2](/assets/app-preview/Location2.png)
+![SavedLocationDetail](/assets/app-preview/weatherSavedDetail.png)
 
 
 ## About this Project
