@@ -35,33 +35,34 @@ export default function LocationDetailPage({ route, navigation }) {
   let width = Dimensions.get("window").width + 300;
 
   useEffect(() => {
-    
+
     const { cityName } = route.params;
     cityName
-    ? searchCityByName(cityName)
-    : receiveDataFromSearch();
+      ? searchCityByName(cityName)
+      : receiveDataFromSearch();
     setLocationTheme(themeData[Math.floor(Math.random() * themeData.length)]);
 
     setTimeout(() => {
       setPageLoaded(false);
     }, 1000);
-    
+
   }, []);
 
   searchCityByName = async (cityName) => {
     setPageLoaded(true);
     const response = await searchCityWeather(cityName);
+
     handleResponse(response);
   }
 
   const receiveDataFromSearch = () => {
     handleResponse(route.params.responseWeather);
   }
-  
+
   handleResponse = (responseWeather) => {
     const { data } = responseWeather;
     let weatherResponse = {};
-    
+
     weatherResponse['latestWeather'] = data.list[0];
     weatherResponse['dayWeather'] = data.list.splice(1, 5);
     weatherResponse['cityName'] = data.city.name;
@@ -76,13 +77,29 @@ export default function LocationDetailPage({ route, navigation }) {
     try {
       let savedLocations = await AsyncStorage.getItem('locations');
       savedLocations = JSON.parse(savedLocations);
-      savedLocations = [ ...savedLocations, { cityName: cityWeatherInfo.cityName, theme: locationTheme }];
+
+      if (savedLocations?.length) {
+        savedLocations = [...savedLocations, { cityName: cityWeatherInfo.cityName, theme: locationTheme }];
+      } else {
+        savedLocations = [{ cityName: cityWeatherInfo.cityName, theme: locationTheme }];
+      }
+
       await AsyncStorage.setItem('locations', JSON.stringify(savedLocations));
       route.params.onGoBack();
       navigation.goBack();
     } catch (e) {
       console.log('error =>', e);
     }
+  };
+
+  const removeLocation = async () => {
+    let savedLocations = await AsyncStorage.getItem('locations');
+    savedLocations = JSON.parse(savedLocations);
+
+    savedLocations = savedLocations.filter(location => location.cityName !== route.params.cityName);
+    await AsyncStorage.setItem('locations', JSON.stringify(savedLocations));
+    route.params.onGoBack();
+    navigation.goBack();
   };
 
   showLoading = () => {
@@ -97,55 +114,67 @@ export default function LocationDetailPage({ route, navigation }) {
     );
   }
 
-  return pageLoaded ? ( showLoading() )
-  : (
-    <>
-      <Container>
-        <BackgroundDetailsBox>
+  return pageLoaded ? (showLoading())
+    : (
+      <>
+        <Container>
+          <BackgroundDetailsBox>
 
-          <ImageBackground
-            resizeMode="cover"
-            imageStyle={{ width: width }}
-            source={locationTheme?.backgroundImage}
-          >
+            <ImageBackground
+              resizeMode="cover"
+              imageStyle={{ width: width }}
+              source={locationTheme?.backgroundImage}
+            >
 
-            <WeatherDetail>
-              <WeatherTime>{formatDateWeatherReceived()}</WeatherTime>
-              <WeatherTempDetail>{cityWeatherInfo?.latestWeather?.weather[0]?.description}</WeatherTempDetail>
-              <WeatherTemp>{Math.round(cityWeatherInfo?.latestWeather?.main?.temp)}°</WeatherTemp>
-            </WeatherDetail>
-            <Wave width={800} height={100} />
+              <WeatherDetail>
+                <WeatherTime>{formatDateWeatherReceived()}</WeatherTime>
+                <WeatherTempDetail>{cityWeatherInfo?.latestWeather?.weather[0]?.description}</WeatherTempDetail>
+                <WeatherTemp>{Math.round(cityWeatherInfo?.latestWeather?.main?.temp)}°</WeatherTemp>
+              </WeatherDetail>
+              <Wave width={800} height={100} />
 
-          </ImageBackground>
+            </ImageBackground>
 
 
-        </BackgroundDetailsBox>
-      </Container>
+          </BackgroundDetailsBox>
+        </Container>
 
-      <ContainerFlex>
-        <InfoContainer>
+        <ContainerFlex>
+          <InfoContainer>
 
-          <IconContainer>
-            <Icon
-              raised
-              reverse
-              type='font-awesome'
-              name='plus'
-              color={locationTheme?.color}
-              reverseColor='#fff'
-              onPress={() => saveLocation()}
-            />
-          </IconContainer>
+            <IconContainer>
 
-          <CityName color={locationTheme?.color}>{cityWeatherInfo?.cityName}</CityName>
+              {route.params.cityName ?
+                (<Icon
+                  raised
+                  reverse
+                  type='font-awesome'
+                  name='times'
+                  color='#EE4540'
+                  reverseColor='#fff'
+                  onPress={() => removeLocation()}
+                />)
+                :
+                (<Icon
+                  raised
+                  reverse
+                  type='font-awesome'
+                  name='plus'
+                  color={locationTheme?.color}
+                  reverseColor='#fff'
+                  onPress={() => saveLocation()}
+                />)}
+            </IconContainer>
 
-          <WeatherContainer>
-            <WeatherList dayWeather={cityWeatherInfo?.dayWeather} />
-          </WeatherContainer>
+            <CityName color={locationTheme?.color}>{cityWeatherInfo?.cityName}</CityName>
 
-        </InfoContainer>
+            <WeatherContainer>
+              <WeatherList dayWeather={cityWeatherInfo?.dayWeather} />
+            </WeatherContainer>
 
-      </ContainerFlex>
-    </>
-  );
+          </InfoContainer>
+
+        </ContainerFlex>
+      </>
+    );
 }

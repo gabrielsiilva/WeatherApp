@@ -63,3 +63,15 @@ export const LocationText = styled.Text`
   font-size: 15px;
   margin-bottom: 15px;
 `;
+
+export const ContainerEmptyLocations = styled.View`
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const EmptyLocationText = styled.Text`
+  color: #939393;
+  font-weight: 300;
+  font-size: 15px;
+`;

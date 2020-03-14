@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ActivityIndicator, AsyncStorage } from 'react-native';
+import { ActivityIndicator, AsyncStorage, Text, View } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
 
 import LocationCard from '../../components/LocationCard';
@@ -14,7 +14,9 @@ import {
   SearchLocationButtonText,
   ScrollContainer,
   LoadingContainer,
-  LoadingText
+  LoadingText,
+  ContainerEmptyLocations,
+  EmptyLocationText
 } from './styles.js';
 
 import { searchCityWeather } from '../../services/api';
@@ -58,6 +60,14 @@ export default function DashboardPage({ navigation }) {
     );
   }
 
+  renderEmptySavedLocations = () => {
+    return (
+      <ContainerEmptyLocations>
+        <EmptyLocationText>You dont't have saved locations yet. :(</EmptyLocationText>
+      </ContainerEmptyLocations>
+    );
+  }
+
   return loading ? (showLoading())
     :
     (
@@ -78,23 +88,25 @@ export default function DashboardPage({ navigation }) {
           </SearchLocationButton>
         </SearchLocationContainer>
 
-        <ScrollContainer>
+        {savedLocations.length ?
+          (<ScrollContainer>
 
-          <LocationsContainer>
-            <LocationText>Your Saved Locations</LocationText>
-            <FlatList
-              data={savedLocations}
-              showsHorizontalScrollIndicator={false}
-              showsVerticalScrollIndicator={false}
-              renderItem={({ item }) => (
-                <LocationCard
-                  savedLocation={item}
-                  navigateTo={() => navigation.navigate('Details', { cityName: item.cityName, onGoBack: () => this.getAsyncStorageData() })}
-                />
-              )}
-            />
-          </LocationsContainer>
-        </ScrollContainer>
-      </Container>
+            <LocationsContainer>
+              <LocationText>Your Saved Locations</LocationText>
+              <FlatList
+                data={savedLocations}
+                showsHorizontalScrollIndicator={false}
+                showsVerticalScrollIndicator={false}
+                renderItem={({ item }) => (
+                  <LocationCard
+                    savedLocation={item}
+                    navigateTo={() => navigation.navigate('Details', { cityName: item.cityName, onGoBack: () => this.getAsyncStorageData() })}
+                  />
+                )}
+              />
+            </LocationsContainer>
+          </ScrollContainer >)
+          : renderEmptySavedLocations()}
+      </Container >
     );
 }
